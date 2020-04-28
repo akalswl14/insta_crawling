@@ -87,8 +87,10 @@ def ScrollFeed(driver, instaId):
     
     pageString = driver.page_source
     soup = BeautifulSoup(pageString, "lxml")
-    OriginalFollowerNum = int(soup.select('.g47SY.lOXF2')[1].text)
-    OriginalPostNum = int(soup.select('.g47SY.lOXF2')[0].text)
+    OriginalFollowerNum = soup.select('.g47SY.lOXF2')[1].text
+    OriginalFollowerNum = int(OriginalFollowerNum.replace(",",""))
+    OriginalPostNum = soup.select('.g47SY.lOXF2')[0].text
+    OriginalPostNum = int(OriginalPostNum.replace(",",""))
 
     GetFollowers(driver,OriginalFollowerNum)
 
