@@ -45,7 +45,8 @@ def Login(driver):
         # pass
     time.sleep(4)
 
-def GetFollowers(driver,OriginalFollowerNum):
+def GetFollowers(driver,instaId):
+    url = baseUrl + instaId
     driver.find_element(By.XPATH,'//*[@id="react-root"]/section/main/div/ul/li[2]/a').click()
     time.sleep(3)
     driver.find_element(By.XPATH,'/html/body/div[5]/div/div[2]/div/div/div/div[3]/a').click()
@@ -53,7 +54,6 @@ def GetFollowers(driver,OriginalFollowerNum):
     driver.find_element(By.XPATH,'//*[@id="react-root"]/section/main/div/ul/li[2]/a').click()
     time.sleep(3)
     FollowerList = []
-    print("팔로워 수는 원래 " + str(OriginalFollowerNum)+"개 입니다.")
     while True:
         print('스크롤 하면서 Follower페이지의 끝을 찾는 중입니다.')
         pageString = driver.page_source
@@ -72,19 +72,28 @@ def GetFollowers(driver,OriginalFollowerNum):
             new_height = driver.execute_script("return document.body.scrollHeight")
             if new_height == last_height:
                 FollowerList = list(set(FollowerList))
+                print(str(len(FollowerList))+"개의 팔로워 수집")
                 break
             else:
                 last_height = new_height
                 continue
-
-    MakeFollowerExcel(FollowerList)
-    driver.find_element(By.XPATH,'//*[@id="react-root"]/section/nav/div/div/div[2]/div/div/div[5]/a').click()
+    driver.get(url)
+    # MakeFollowerExcel(FollowerList)
+    return FollowerList
 
 def ScrollFeed(driver, instaId):
     url = baseUrl + instaId
     driver.get(url)
     time.sleep(3)
-    
+
+    try : 
+        xpath = '//*[@id="react-root"]/section/nav/div/div/section/div/div[2]/div[4]/button'
+        element = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, xpath))
+        )
+        driver.find_element(By.XPATH,xpath).click()
+    except :
+        pass
     pageString = driver.page_source
     soup = BeautifulSoup(pageString, "lxml")
     OriginalFollowerNum = soup.select('.g47SY.lOXF2')[1].text
@@ -92,7 +101,9 @@ def ScrollFeed(driver, instaId):
     OriginalPostNum = soup.select('.g47SY.lOXF2')[0].text
     OriginalPostNum = int(OriginalPostNum.replace(",",""))
 
-    GetFollowers(driver,OriginalFollowerNum)
+    print("팔로워 수는 원래 " + str(OriginalFollowerNum)+"개 입니다.")
+
+    FollowerList = GetFollowers(driver,instaId)
 
     time.sleep(3)
 
@@ -104,6 +115,14 @@ def ScrollFeed(driver, instaId):
     print("포스트 갯수는 원래 " + str(OriginalPostNum)+"개 입니다.")
 
     while True:
+        try : 
+            xpath = '//*[@id="react-root"]/section/nav/div/div/section/div/div[2]/div[4]/button'
+            element = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, xpath))
+            )
+            driver.find_element(By.XPATH,xpath).click()
+        except :
+            pass
         print('스크롤 하면서 페이지의 끝을 찾는 중입니다.')
         pageString = driver.page_source
         bsObj = BeautifulSoup(pageString, "lxml")
