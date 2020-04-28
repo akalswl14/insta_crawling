@@ -98,7 +98,7 @@ def ScrollFeed(driver, instaId):
     soup = BeautifulSoup(pageString, "lxml")
     OriginalFollowerNum = soup.select('.g47SY.lOXF2')[1].text
     OriginalFollowerNum = int(OriginalFollowerNum.replace(",",""))
-    OriginalPostNum = soup.select('.g47SY.lOXF2')[0].text
+    OriginalPostNum = soup.select('.g47SY.lOXF2')[0].attrs['title']
     OriginalPostNum = int(OriginalPostNum.replace(",",""))
 
     print("팔로워 수는 원래 " + str(OriginalFollowerNum)+"개 입니다.")
