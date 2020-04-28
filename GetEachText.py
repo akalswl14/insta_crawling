@@ -21,7 +21,7 @@ warnings.filterwarnings(action='ignore')  # 경고 메세지 제거
 ProjectFolder = os.getcwd()
 
 # 인스타 그램 url 생성
-baseUrl = "https://www.instagram.com/"
+baseUrl = "https://www.instagram.com"
 
 
 def EachFeed(driver, FeedUrlList):
@@ -35,7 +35,7 @@ def GetEachContents(driver, EachUrl):
     FeedData = []
     url = baseUrl+str(EachUrl)
     driver.get(url)
-    sleep(2)
+    sleep(3)
     try:
         driver.find_element(
             By.XPATH, '//*[@id="react-root"]/section/nav/div/div/section/div/div[2]/div[4]/button').click()
@@ -50,6 +50,9 @@ def GetEachContents(driver, EachUrl):
     except:
         pass
     else:
+        element = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, '//*[@id="react-root"]/section/main/div/div/article/div[2]/div[1]/div/div/span/span[2]/button'))
+        )
         driver.find_element(By.XPATH, '//*[@id="react-root"]/section/main/div/div/article/div[2]/div[1]/div/div/span/span[2]/button').click()
 
     pageString = driver.page_source

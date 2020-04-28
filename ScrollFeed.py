@@ -144,4 +144,23 @@ def ScrollFeed(driver, instaId):
     f.write(str(reallink))
     f.close()
     print("txt저장성공")
+    Logout(driver)
     return reallink
+
+def Logout(driver):
+    xpath = '//*[@id="react-root"]/section/nav[1]/div/header/div/div[1]/button'
+    element = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, xpath))
+        )
+    driver.find_element(By.XPATH,xpath).click()
+    xpath = '//*[@id="react-root"]/section/nav[1]/div/section/div[3]/div/div[4]/div/div/a'
+    element = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, xpath))
+        )
+    driver.find_element(By.XPATH,xpath).click()
+    xpath = '/html/body/div[4]/div/div/div[2]/button[1]'
+    element = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, xpath))
+        )
+    driver.find_element(By.XPATH,xpath).click()
+    sleep(2)
