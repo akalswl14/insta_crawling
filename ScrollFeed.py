@@ -171,6 +171,8 @@ def ScrollFeed(driver, instaId):
     return reallink
 
 def Logout(driver):
+    driver.find_element(By.XPATH,'//*[@id="react-root"]/section/nav/div/div/div[2]/div/div/div[5]/a').click()
+    sleep(2)
     xpath = '//*[@id="react-root"]/section/nav[1]/div/header/div/div[1]/button'
     element = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.XPATH, xpath))
