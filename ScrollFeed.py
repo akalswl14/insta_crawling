@@ -13,6 +13,8 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.chrome.options import Options
 
 from MakeExcel import MakeFollowerExcel
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 
 warnings.filterwarnings(action='ignore')  # 경고 메세지 제거
