@@ -12,44 +12,91 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.chrome.options import Options
 
+from MakeExcel import MakeFollowerExcel
+
 
 warnings.filterwarnings(action='ignore')  # 경고 메세지 제거
 
 # 인스타 그램 url 생성
 baseUrl = "https://www.instagram.com/"
 
+SCROLL_PAUSE_TIME = 1.0
+
+def Login(driver):
+    # login_section = '//*[@id="react-root"]/section/nav/div/div/div[2]/div/div/div/a[1]'
+    # driver.find_element_by_xpath(login_section).click()
+    time.sleep(2)
+    elem_login = driver.find_element_by_name("username")
+    elem_login.clear()
+    elem_login.send_keys('WRITE_YOUR_ID')
+    elem_login = driver.find_element_by_name('password')
+    elem_login.clear()
+    elem_login.send_keys('WRITE_YOUR_PASSWORD')
+    time.sleep(1)
+    xpath = '//*[@id="react-root"]/section/main/article/div/div/div/form/div[7]/button'
+    driver.find_element_by_xpath(xpath).click()
+    time.sleep(3)
+    # try:
+    xpath = '//*[@id="react-root"]/section/main/div/div/div/button'
+    driver.find_element_by_xpath(xpath).click()
+    # except:
+        # pass
+    time.sleep(4)
+
+def GetFollowers(driver,OriginalFollowerNum):
+    driver.find_element(By.XPATH,'//*[@id="react-root"]/section/main/div/ul/li[2]/a').click()
+    time.sleep(3)
+    driver.find_element(By.XPATH,'/html/body/div[5]/div/div[2]/div/div/div/div[3]/a').click()
+    Login(driver)
+    driver.find_element(By.XPATH,'//*[@id="react-root"]/section/main/div/ul/li[2]/a').click()
+    time.sleep(3)
+    FollowerList = []
+    print("팔로워 수는 원래 " + str(OriginalFollowerNum)+"개 입니다.")
+    while True:
+        print('스크롤 하면서 Follower페이지의 끝을 찾는 중입니다.')
+        pageString = driver.page_source
+        soup = BeautifulSoup(pageString, "lxml")
+        FollowerElementList = soup.select('.d7ByH')
+        for follower in FollowerElementList :
+            FollowerList.append(follower.text)
+
+        last_height = driver.execute_script("return document.body.scrollHeight")
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        sleep(SCROLL_PAUSE_TIME)
+        new_height = driver.execute_script("return document.body.scrollHeight")
+        if new_height == last_height:
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            sleep(SCROLL_PAUSE_TIME)
+            new_height = driver.execute_script("return document.body.scrollHeight")
+            if new_height == last_height:
+                FollowerList = list(set(FollowerList))
+                break
+            else:
+                last_height = new_height
+                continue
+
+    MakeFollowerExcel(FollowerList)
+    driver.find_element(By.XPATH,'//*[@id="react-root"]/section/nav/div/div/div[2]/div/div/div[5]/a').click()
+
 def ScrollFeed(driver, instaId):
     url = baseUrl + instaId
     driver.get(url)
     time.sleep(3)
-    # # 로그인 하기
-    # login_section = '//*[@id="react-root"]/section/nav/div/div/div[2]/div/div/div/a[1]'
-    # driver.find_element_by_xpath(login_section).click()
-    # time.sleep(2)
-    # elem_login = driver.find_element_by_name("username")
-    # elem_login.clear()
-    # elem_login.send_keys('WRITE_YOUR_ID')
-    # elem_login = driver.find_element_by_name('password')
-    # elem_login.clear()
-    # elem_login.send_keys('WRITE_YOUR_PASSWORD')
-    # time.sleep(1)
-    # xpath = '//*[@id="react-root"]/section/main/article/div/div/div/form/div[7]/button'
-    # driver.find_element_by_xpath(xpath).click()
-    # time.sleep(1)
-    # # try:
-    # xpath = '//*[@id="react-root"]/section/main/div/div/div/button'
-    # driver.find_element_by_xpath(xpath).click()
-    # # except:
-    #     # pass
-    # time.sleep(4)
+    
+    pageString = driver.page_source
+    soup = BeautifulSoup(pageString, "lxml")
+    OriginalFollowerNum = int(soup.select('.g47SY.lOXF2')[1].text)
+    OriginalPostNum = int(soup.select('.g47SY.lOXF2')[0].text)
 
-    #스크롤하기
-    SCROLL_PAUSE_TIME = 1.0
+    GetFollowers(driver,OriginalFollowerNum)
+
+    time.sleep(3)
+
     reallink = []  # 게시물 url 리스트
 
     pageString = driver.page_source
     soup = BeautifulSoup(pageString, "lxml")
-    OriginalPostNum = int(soup.select('.g47SY.lOXF2')[0].text)
+    
     print("포스트 갯수는 원래 " + str(OriginalPostNum)+"개 입니다.")
 
     while True:
