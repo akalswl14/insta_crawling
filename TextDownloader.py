@@ -33,7 +33,8 @@ driver = webdriver.Chrome(
     executable_path=ProjectFolder+"/chromedriver", chrome_options=options
 )
 
-instaId = 'stylebox2u'
+instaId = 'b.box2u'
+# instaId = 'stylebox2u'
 # FeedUrlList = ['p/B-enhBhg3PR/']
 FeedUrlList = ScrollFeed(driver,instaId)
 FeedDataList = EachFeed(driver,FeedUrlList)

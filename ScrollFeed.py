@@ -30,10 +30,10 @@ def Login(driver):
     time.sleep(2)
     elem_login = driver.find_element_by_name("username")
     elem_login.clear()
-    elem_login.send_keys('WRITE_YOUR_ID')
+    elem_login.send_keys('style@bbox2u.com')
     elem_login = driver.find_element_by_name('password')
     elem_login.clear()
-    elem_login.send_keys('WRITE_YOUR_PASSWORD')
+    elem_login.send_keys('bbox160523!')
     time.sleep(1)
     xpath = '//*[@id="react-root"]/section/main/article/div/div/div/form/div[7]/button'
     driver.find_element_by_xpath(xpath).click()
@@ -103,7 +103,7 @@ def ScrollFeed(driver, instaId):
 
     print("팔로워 수는 원래 " + str(OriginalFollowerNum)+"개 입니다.")
 
-    FollowerList = GetFollowers(driver,instaId)
+    # FollowerList = GetFollowers(driver,instaId)
 
     time.sleep(3)
 
@@ -113,7 +113,8 @@ def ScrollFeed(driver, instaId):
     soup = BeautifulSoup(pageString, "lxml")
     
     print("포스트 갯수는 원래 " + str(OriginalPostNum)+"개 입니다.")
-
+    # EX_FeedElementSet = set()
+    OnScroll = False
     while True:
         try : 
             xpath = '//*[@id="react-root"]/section/nav/div/div/section/div/div[2]/div[4]/button'
@@ -126,38 +127,41 @@ def ScrollFeed(driver, instaId):
         print('스크롤 하면서 페이지의 끝을 찾는 중입니다.')
         pageString = driver.page_source
         bsObj = BeautifulSoup(pageString, "lxml")
-        for link1 in bsObj.find_all(name="div", attrs={"class": "Nnq7C weEfm"}):
-            atagLength = len(link1.select('a'))
-            title = link1.select('a')[0]
-            real = title.attrs['href']
-            reallink.append(real)
-            if(atagLength > 1):
-                title = link1.select('a')[1]
-                real = title.attrs['href']
-                reallink.append(real)
-                if(atagLength > 2):
-                    title = link1.select('a')[2]
-                    real = title.attrs['href']
-                    reallink.append(real)
+
+        if OnScroll == False :
+            FeedElementList = bsObj.select(".v1Nh3.kIKUG._bz0w a")
+            for EachFeed in FeedElementList :
+                reallink.append(EachFeed.attrs['href'])
+            OnScroll = True
+        else :
+            FeedElementList = bsObj.select(".v1Nh3.kIKUG._bz0w a")
+            ListSize = len(FeedElementList)
+            if ListSize > 12 :
+                NewStartPoint = ListSize-12
+                FeedElementList = FeedElementList[NewStartPoint:]
+            for EachFeed in FeedElementList :
+                reallink.append(EachFeed.attrs['href'])
 
         last_height = driver.execute_script("return document.body.scrollHeight")
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         sleep(SCROLL_PAUSE_TIME)
         new_height = driver.execute_script("return document.body.scrollHeight")
         if new_height == last_height:
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            sleep(SCROLL_PAUSE_TIME)
-            new_height = driver.execute_script("return document.body.scrollHeight")
-            if new_height == last_height:
-                reallink = list(set(reallink))
-                if (len(reallink) != OriginalPostNum): #원래 게시글 갯수와 다르면 다시 스크롤
-                    driver.get(url)
-                    continue
-                else:
-                    break
-            else:
-                last_height = new_height
-                continue
+            reallink = list(set(reallink))
+            if(len(reallink) != OriginalPostNum):
+                print("현재 모은 url 개수는 "+ str(len(reallink)))
+                while new_height == last_height :
+                    print("last_height:"+str(last_height)+"/new_height:"+str(new_height))
+                    print('게시글 개수만큼 크롤링되지 않아서 무한 로딩중...!')
+                    last_height = driver.execute_script("return document.body.scrollHeight")
+                    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                    sleep(SCROLL_PAUSE_TIME)
+                    new_height = driver.execute_script("return document.body.scrollHeight")
+            else :
+                break
+        else:
+            last_height = new_height
+            continue
 
     reallinknum = len(reallink)
     print("총"+str(reallinknum)+"개의 데이터.")
@@ -167,7 +171,7 @@ def ScrollFeed(driver, instaId):
     f.write(str(reallink))
     f.close()
     print("txt저장성공")
-    Logout(driver)
+    # Logout(driver)
     return reallink
 
 def Logout(driver):
